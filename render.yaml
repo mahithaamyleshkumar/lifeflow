@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: lifeflow-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+    disk:
+      name: lifeflow-data
+      mountPath: /app/data
+      sizeGB: 1

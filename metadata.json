@@ -1,0 +1,6 @@
+{
+  "name": "LifeFlow",
+  "description": "Plan your life. Track your progress. Become your best self.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

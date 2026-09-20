@@ -1,0 +1,9 @@
+{
+  "appId": "com.lifeflow.app",
+  "appName": "LifeFlow",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "cleartext": true
+  }
+}
