@@ -29,8 +29,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await api.getMe();
         setUser(res.user);
       } else {
-        setTokenState(null);
-        setUser(null);
+        const guestStorageKey = 'lifeflow_guest_id';
+        const storedGuestId = localStorage.getItem(guestStorageKey);
+        const guestId = storedGuestId || crypto.randomUUID();
+        if (!storedGuestId) {
+          localStorage.setItem(guestStorageKey, guestId);
+        }
+
+        const res = await api.login({ name: `Guest ${guestId.slice(0, 8)}` });
+        setTokenState(res.token);
+        setUser(res.user);
       }
     } catch (err) {
       console.warn('Session verification failed, clearing token:', err);
