@@ -607,7 +607,7 @@ export async function calculateFullStreakSystem(userId: string, asOfDate: string
   });
 
   // Habit milestones
-  habitStreaks.forEach((h) => {
+  habitStreaks.forEach((h: any) => {
     h.milestones.forEach((m: any) => {
       allMilestones.push({
         id: `habit_${h.id}_${m.days}`,

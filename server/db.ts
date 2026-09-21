@@ -1,6 +1,9 @@
 import { PGlite } from '@electric-sql/pglite';
+import { Pool } from 'pg';
 import path from 'path';
 import fs from 'fs';
+
+const databaseUrl = process.env.DATABASE_URL;
 
 const dataDir = path.join(process.cwd(), 'data');
 if (!fs.existsSync(dataDir)) {
@@ -13,19 +16,26 @@ if (!fs.existsSync(dataDir)) {
 
 const dbPath = path.join(dataDir, 'lifeflow.db');
 
-export let pg: PGlite;
-try {
-  pg = new PGlite(dbPath);
-} catch (err) {
-  console.warn('Falling back to in-memory PGlite:', err);
-  pg = new PGlite();
+export let pg: any;
+if (databaseUrl) {
+  pg = new Pool({
+    connectionString: databaseUrl,
+    ssl: databaseUrl.includes('localhost') ? false : { rejectUnauthorized: false }
+  });
+} else {
+  try {
+    pg = new PGlite(dbPath);
+  } catch (err) {
+    console.warn('Falling back to in-memory PGlite:', err);
+    pg = new PGlite();
+  }
 }
 
 export async function initDatabase() {
-  console.log('Initializing PostgreSQL database schema with PGlite...');
+  console.log(`Initializing PostgreSQL database schema with ${databaseUrl ? 'hosted PostgreSQL' : 'PGlite'}...`);
 
   // 1. Users table
-  await pg.exec(`
+  const schema = `
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -173,7 +183,13 @@ export async function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_habits_user ON habits(user_id);
     CREATE INDEX IF NOT EXISTS idx_habit_completions_user_date ON habit_completions(user_id, date);
     CREATE INDEX IF NOT EXISTS idx_reflections_user_date ON daily_reflections(user_id, date);
-  `);
+  `;
+
+  if (databaseUrl) {
+    await pg.query(schema);
+  } else {
+    await pg.exec(schema);
+  }
 
   // Seed default achievements
   const defaultAchievements = [
